@@ -5,5 +5,4 @@ numpy
 matplotlib
 ipywidgets
 healpy
-camb
 
