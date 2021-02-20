@@ -5,7 +5,6 @@ numpy
 matplotlib
 ipywidgets
 healpy
-sys
 platform
 warnings
 
