@@ -1,0 +1,12 @@
+astropy
+matplotlib
+scipy
+numpy
+mpl_toolkits
+matplotlib
+ipywidgets
+healpy
+sys
+platform
+warnings
+
