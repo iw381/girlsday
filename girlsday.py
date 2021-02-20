@@ -26,8 +26,8 @@ import ipywidgets as widgets
 import healpy as hp
 
 import sys, platform, os
-import camb
-from camb import model, initialpower
+#import camb
+#from camb import model, initialpower
 
 
 import warnings
@@ -286,30 +286,30 @@ int_wdgtCMB = widgets.IntSlider(
 ########################## PART 4 #############################################################
 
 #Set up a new set of parameters for CAMB
-pars = camb.CAMBparams()
+#pars = camb.CAMBparams()
 #This function sets up CosmoMC-like settings, with one massive neutrino and helium set using BBN consistency
-pars.set_cosmology(H0=67.5, ombh2=0.022, omch2=0.122, mnu=0.06, omk=0, tau=0.06)
-pars.InitPower.set_params(As=2e-9, ns=0.965, r=0)
-pars.set_for_lmax(2500, lens_potential_accuracy=0);
+#pars.set_cosmology(H0=67.5, ombh2=0.022, omch2=0.122, mnu=0.06, omk=0, tau=0.06)
+#pars.InitPower.set_params(As=2e-9, ns=0.965, r=0)
+#pars.set_for_lmax(2500, lens_potential_accuracy=0);
 
-results = camb.get_results(pars)
-powers =results.get_cmb_power_spectra(pars, CMB_unit='muK')
-totCL_fiducial=powers['total']
-ls = np.arange(totCL_fiducial.shape[0])
+#results = camb.get_results(pars)
+#powers =results.get_cmb_power_spectra(pars, CMB_unit='muK')
+#totCL_fiducial=powers['total']
+#ls = np.arange(totCL_fiducial.shape[0])
 
-def createCldata (oBar):
-    pars = camb.CAMBparams()
-    #This function sets up CosmoMC-like settings, with one massive neutrino and helium set using BBN consistency
-    pars.set_cosmology(H0=67.5, ombh2=oBar, omch2=0.122, mnu=0.06, omk=0, tau=0.06)
-    pars.InitPower.set_params(As=2e-9, ns=0.965, r=0)
-    pars.set_for_lmax(2500, lens_potential_accuracy=0);
+#def createCldata (oBar):
+#    pars = camb.CAMBparams()
+#    #This function sets up CosmoMC-like settings, with one massive neutrino and helium set using BBN consistency
+#    pars.set_cosmology(H0=67.5, ombh2=oBar, omch2=0.122, mnu=0.06, omk=0, tau=0.06)
+#    pars.InitPower.set_params(As=2e-9, ns=0.965, r=0)
+#    pars.set_for_lmax(2500, lens_potential_accuracy=0);
 
-    results = camb.get_results(pars)
-    powers =results.get_cmb_power_spectra(pars, CMB_unit='muK')
-    totCL_new=powers['total']
-    ls = np.arange(totCL.shape[0])    
+#    results = camb.get_results(pars)
+#    powers =results.get_cmb_power_spectra(pars, CMB_unit='muK')
+#    totCL_new=powers['total']
+#    ls = np.arange(totCL.shape[0])    
 
-    np.savetxt("ClSpectra/Cl_%.3f.dat"%oBar,(ls,totCL_new[:,0]))
+#    np.savetxt("ClSpectra/Cl_%.3f.dat"%oBar,(ls,totCL_new[:,0]))
 
 def plotCMBps (oBarPercent):
     
@@ -334,11 +334,11 @@ def plotCMBps (oBarPercent):
     
 def checkData(minObar,maxObar,stepSize):
     oBar = minObar
-    while oBar < maxObar:
-        fileExists = os.path.isfile("ClSpectra/Cl_%.3f.dat"%oBar)
-        if(not fileExists):
-            createCldata(oBar)
-        oBar += stepSize
+    #while oBar < maxObar:
+    #    fileExists = os.path.isfile("ClSpectra/Cl_%.3f.dat"%oBar)
+    #    #if(not fileExists):
+    #    #    createCldata(oBar)
+    #    oBar += stepSize
 
 # set parameters fro slider widget        
 minObar = 0.002
@@ -347,7 +347,7 @@ stepSize = 0.01
 
 #check if all necessary files are available
 #create them if necessary
-checkData(minObar,maxObar,stepSize)
+#checkData(minObar,maxObar,stepSize)
 
 #loadFiducial data
 ls,totCL_fiducial = np.loadtxt("ClSpectra/Cl_0.022.dat")
