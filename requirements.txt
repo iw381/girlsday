@@ -1,8 +1,0 @@
-astropy
-matplotlib
-scipy
-numpy
-matplotlib
-ipywidgets
-healpy
-cartopy
