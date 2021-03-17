@@ -173,7 +173,10 @@ def triangularPlot ():
     fig, axes = plt.subplots(figsize=(13, 13), sharex=True, sharey=True, ncols=maxL+1, nrows=maxL)
     fig.subplots_adjust(hspace = -0.8)
     mapCur = np.loadtxt("data/triangular00.dat")
-    
+
+    shapeMapArray = np.append([maxL,maxL],np.shape(mapCur))
+    mapArray = np.zeros(shapeMapArray)
+
     pbarTriang = tqdm(total=maxL+1, position=0, leave=True)
     for i in range(maxL):
         summedMapsCur = np.zeros_like(mapCur)
@@ -190,23 +193,182 @@ def triangularPlot ():
                 axes[i, j].axis('off')
                 if(j==0):
                     axes[i, j].text(leftMarginEll,230,"$\ell=%d$:"%i,size=18)
-            summedMapsCur += mapCur
-        if (i==0):
-            summedMaps[i] = summedMapsCur
-        else:
-            summedMaps[i] = summedMaps[i-1] + summedMapsCur
+                mapArray[i,j] = mapCur
         pbarTriang.update(1)
-
-
-    #last column that gives the cumulative sum of all modes with l<=lCur
+        
+        
     axes[0, maxL].text(leftMarginM,topMargMfirst,r"$\Sigma_{\ell\leq\ell_{cur},m(\ell)}$",size=18)
     for curL in range(maxL):
-        axes[curL, maxL].imshow(summedMaps[i],cmap='gist_earth')
+        curSummedMap = np.zeros_like(mapArray[0,0])
+        for j in range(curL+1):
+            curSummedMap += np.sum(mapArray[j],axis=0)
+        
+        axes[curL, maxL].imshow(curSummedMap,cmap='gist_earth')
         axes[curL, maxL].axis('off')
-        if(curL==maxL/2-2):
-            pbarTriang.update(1)
+
 
 pbar.update(1)
+
+
+## Martina's 1st part
+
+check_l0 = widgets.Checkbox(
+    value=True,
+    description='l=0',
+    disabled=False,
+    indent=False
+)
+check_l1 = widgets.Checkbox(
+    value=False,
+    description='l=1',
+    disabled=False,
+    indent=False
+)
+check_l2 = widgets.Checkbox(
+    value=False,
+    description='l=2',
+    disabled=False,
+    indent=False
+)
+check_l3 = widgets.Checkbox(
+    value=False,
+    description='l=3',
+    disabled=False,
+    indent=False
+)
+check_l4 = widgets.Checkbox(
+    value=False,
+    description='l=4',
+    disabled=False,
+    indent=False
+)
+
+def superpose_spherical_harmonics(l0, l1, l2, l3, l4):
+    map00 = np.loadtxt("data/triangular00.dat")
+    superposition = np.zeros_like(map00)
+    if l0:
+        superposition += map00
+    if l1:
+        m10 = np.loadtxt("data/triangular10.dat")
+        m11 = np.loadtxt("data/triangular11.dat")
+        superposition += m10+m11
+    if l2:
+        m20 = np.loadtxt("data/triangular20.dat")
+        m21 = np.loadtxt("data/triangular21.dat")
+        m22 = np.loadtxt("data/triangular22.dat")
+        superposition += m20+m21+m22
+    if l3:
+        m30 = np.loadtxt("data/triangular30.dat")
+        m31 = np.loadtxt("data/triangular31.dat")
+        m32 = np.loadtxt("data/triangular32.dat")
+        m33 = np.loadtxt("data/triangular33.dat")
+        superposition += m30+m31+m32+m33
+    if l4:
+        m40 = np.loadtxt("data/triangular40.dat")
+        m41 = np.loadtxt("data/triangular41.dat")
+        m42 = np.loadtxt("data/triangular42.dat")
+        m43 = np.loadtxt("data/triangular43.dat")
+        m44 = np.loadtxt("data/triangular44.dat")
+        superposition += m40+m41+m42+m43+m44
+    plotEarth(superposition)
+
+
+out1 = widgets.interactive_output(superpose_spherical_harmonics, {'l0':check_l0,'l1':check_l1, 'l2':check_l2, 'l3':check_l3, 'l4':check_l4})
+
+
+## Martina's 2nd part
+
+check_l0 = widgets.Checkbox(
+    value=True,
+    description='l=0',
+    disabled=False,
+    indent=False
+)
+check_l1m0 = widgets.Checkbox(
+    value=False,
+    description='l=1, m=0',
+    disabled=False,
+    indent=False
+)
+check_l1m1 = widgets.Checkbox(
+    value=False,
+    description='l=1, m=1',
+    disabled=False,
+    indent=False
+)
+check_l2m0 = widgets.Checkbox(
+    value=False,
+    description='l=2, m=0',
+    disabled=False,
+    indent=False
+)
+check_l2m1 = widgets.Checkbox(
+    value=False,
+    description='l=2, m=1',
+    disabled=False,
+    indent=False
+)
+check_l2m2 = widgets.Checkbox(
+    value=False,
+    description='l=2, m=2',
+    disabled=False,
+    indent=False
+)
+check_l3m0 = widgets.Checkbox(
+    value=False,
+    description='l=3, m=0',
+    disabled=False,
+    indent=False
+)
+check_l3m1 = widgets.Checkbox(
+    value=False,
+    description='l=3, m=1',
+    disabled=False,
+    indent=False
+)
+check_l3m2 = widgets.Checkbox(
+    value=False,
+    description='l=3, m=2',
+    disabled=False,
+    indent=False
+)
+check_l3m3 = widgets.Checkbox(
+    value=False,
+    description='l=3, m=3',
+    disabled=False,
+    indent=False
+)
+
+def superpose_spherical_harmonics(l0, l1m0, l1m1, l2m0, l2m1, l2m2, l3m0,l3m1,l3m2,l3m3):
+    map00 = np.loadtxt("data/triangular00.dat")
+    superposition = np.zeros_like(map00)
+    if l0:
+        superposition += map00
+    if l1m0:
+        superposition += np.loadtxt("data/triangular10.dat") 
+    if l1m1:
+        superposition += np.loadtxt("data/triangular11.dat")
+    if l2m0:
+        superposition += np.loadtxt("data/triangular20.dat")
+    if l2m1:
+        superposition += np.loadtxt("data/triangular21.dat")
+    if l2m2:
+        superposition += np.loadtxt("data/triangular22.dat")
+    if l3m0:
+        superposition += np.loadtxt("data/triangular30.dat")
+    if l3m1:
+        superposition += np.loadtxt("data/triangular31.dat")
+    if l3m2:
+        superposition += np.loadtxt("data/triangular32.dat")
+    if l3m3:
+        superposition += np.loadtxt("data/triangular33.dat")
+    plotEarth(superposition)
+
+
+out2 = widgets.interactive_output(superpose_spherical_harmonics, {'l0':check_l0,'l1m0':check_l1m0,'l1m1':check_l1m1,'l2m0':check_l2m0,'l2m1':check_l2m1,'l2m2':check_l2m2, 'l3m0':check_l3m0, 'l3m1':check_l3m1, 'l3m2':check_l3m2, 'l3m3':check_l3m3})
+
+
+
 
 ########################## PART 4 #############################################################
 
