@@ -161,13 +161,13 @@ def plotEarth_Powerspectrum(earthMap,clCur,LMAX):
     gs2 = fig.add_gridspec(nrows=1, ncols=1, left=0.30, right=0.98,wspace=0.05)
     ax2 = fig.add_subplot(gs2[0,0])
 
-    #ax2 = fig.add_subplot(gs[:,1])
     im = ax2.imshow(earthMap,cmap='gist_earth',vmin=-8000, vmax=6705)
     
     #setting position and size of colorbar (xPos,yPos,width,height)
     cax = fig.add_axes([0.434, 0.16, 0.4, 0.018]) 
     cbar = fig.colorbar(im,orientation="horizontal",cax=cax)
     cbar.set_label('Höhe über N.N. [m]', size=24, labelpad=20)
+    ax2.text(700,10,'$\ell = %d$'%LMAX, size=24)
     ax2.axis('off')
 
 
@@ -188,18 +188,23 @@ cl = np.loadtxt("data/clEarth.dat")
 ell = np.arange(len(cl))
 
 
-def plotAlmMap (LMAX):
-    mollviewMapReconstr = np.loadtxt("data/mollviewEarth_recon_max%d.dat"%LMAX)
+def plotAlmMap (i):
+
+    LMAX = int(np.exp(i/28.*5.3))
+
+    mollviewMapReconstr = np.load("data/mollviewEarth_recon_max%d.dat"%LMAX,allow_pickle=True)
     #plotEarth(mollviewMapReconstr)
     #plotPowerspectrum(cl,LMAX)
     plotEarth_Powerspectrum(mollviewMapReconstr,cl,LMAX)
 
-int_wdgt = widgets.IntSlider(
-    description=r'$\ell_\text{max}$:',
-    fontsize=34,
-    value=1,
-    min=1, max=200, step=15,
-    layout=widgets.Layout(width='90%'))
+sliderOptions = np.arange(1,28,1)
+sliderOptions = np.delete(sliderOptions,[1,2,3,5])
+
+int_wdgt = widgets.SelectionSlider(
+    description=r'$\ell$',
+    options=sliderOptions,
+    layout=widgets.Layout(width='90%'),readout=False)
+
 
 pbar.update(1)
 
@@ -521,6 +526,7 @@ def fmtCMB(x, pos):
     b = int(b)
     return r'${}\!\times 10^{{{}}}$'.format(a, b)
 
+
 def plotCMB_Powerspectrum(cmbMap,clCur,LMAX):    
     #split the ell and cl arrays it two halfes 
     # s.t. they can be plotted in two different plot styles 
@@ -570,21 +576,27 @@ def plotCMB_Powerspectrum(cmbMap,clCur,LMAX):
     cax = fig.add_axes([0.434, 0.16, 0.4, 0.018]) 
     cbar = fig.colorbar(im,orientation="horizontal",cax=cax)
     cbar.set_label('Temperaturschwankung $\Delta T$', size=24, labelpad=20)
+    ax2.text(700,10,'$\ell = %d$'%LMAX, size=24)
     ax2.axis('off')
 
 
-def plotAlmMapCMB (LMAX):
+
+def plotAlmMapCMB (i):
+
+    LMAX = int(np.exp(i/30.*6.9))
+
     mollviewMapReconstr = np.loadtxt("data/mollviewCMB_recon_max%d.dat"%LMAX)
     #plotCMB(mollviewMapReconstr)
     #plotPowerspectrumCMB(clCMB[2:],LMAX,True)
     plotCMB_Powerspectrum(mollviewMapReconstr,clCMB[2:],LMAX)
 
-int_wdgtCMB = widgets.IntSlider(
-    description=r'$\ell_\text{max}$:',
-    fontsize=34,
-    value=116,
-    min=1, max=200, step=15,
-    layout=widgets.Layout(width='90%'))
+sliderOptionsCMB = np.arange(1,31,1)
+sliderOptionsCMB = np.delete(sliderOptionsCMB,[1,2,4])
+
+int_wdgtCMB = widgets.SelectionSlider(
+    description=r'$\ell$',
+    options=sliderOptionsCMB,
+    layout=widgets.Layout(width='90%'),readout=False)
 
 # these are the values they have to reconstruct
 a0 = 0.7
@@ -680,8 +692,8 @@ def plotCMBps (oBarPercent):
     ax.set_xlim([0,2500])
     ax.set_ylim([0,15000])
     barPercent = oBar*100
-    ax.text(1750,13000,"Atome: %.1f%%"%barPercent,size=28,color='#2966a3')
-    ax.text(1750,11800,"Atome: 2.2%",size=28,color='k')
+    ax.text(1700,13000,"Atome: %.1f%%"%(barPercent/(barPercent/100.+0.1198)),size=28,color='#2966a3')
+    ax.text(1700,11800,"Atome: 15.5%",size=28,color='k')
 
     
 def checkData(minObar,maxObar,stepSize):
@@ -712,6 +724,6 @@ int_wdgtPowerSpec = widgets.FloatSlider(
     fontsize=34,
     value=minObar,
     min=minObar*100, max=maxObar*100, step=stepSize*100,
-    layout=widgets.Layout(width='90%'))
+    layout=widgets.Layout(width='90%'),readout=False)
 
 
