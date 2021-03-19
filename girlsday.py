@@ -116,6 +116,63 @@ def plotPowerspectrum(clCur,LMAX,isCMB=False):
     plt.yticks(fontsize=16)
     ax.grid(True)
 
+def plotEarth_Powerspectrum(earthMap,clCur,LMAX): 
+    
+    #split the ell and cl arrays it two halfes 
+    # s.t. they can be plotted in two different plot styles 
+    ellLeq = ell[ell<=LMAX]
+    clDimlessLeq = ellLeq* (ellLeq + 1) * clCur[ell<=LMAX]
+    ellGeq = ell[ell>=LMAX]
+    clDimlessGeq = ellGeq * (ellGeq + 1) * clCur[ell>=LMAX]
+    
+    fig = plt.figure(figsize=(18,10),constrained_layout=False)
+    
+    
+    heights = [1.5, 3, 1.5]
+    gs1 = fig.add_gridspec(nrows=3, ncols=1, left=0.05, right=0.25,wspace=0.05, height_ratios=heights)
+    ax1 = fig.add_subplot(gs1[1,0])
+    
+
+    
+    #plot the C_l power spectrum
+    ax1.plot(ellLeq, clDimlessLeq, c="#222222", lw=1.5)
+    ax1.plot(ellGeq, clDimlessGeq, c="#666666", lw=1.5)
+    
+    # add the vertical line and shaded region
+    ax1.axvline(x=LMAX,lw=2)
+    xLim = np.array(ax1.get_xlim())    
+    xLim[1] = 210
+    ax1.axvspan(LMAX, xLim[1], facecolor='0.2', alpha=0.2)
+
+    # plot cosmetics
+    ax1.set_xscale("log")
+    ax1.set_xlim(xLim)
+    ax1.set_xlabel(r"$\ell$", size=24)
+    ax1.set_yscale("log")
+    ax1.set_ylabel(r"$\ell(\ell+1)C_{\ell}$", size=24)
+
+    plt.title("Leistungsspektrum $C_{\ell}$",fontsize=24)
+
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
+    ax1.grid(True)
+    
+
+    gs2 = fig.add_gridspec(nrows=1, ncols=1, left=0.30, right=0.98,wspace=0.05)
+    ax2 = fig.add_subplot(gs2[0,0])
+
+    #ax2 = fig.add_subplot(gs[:,1])
+    im = ax2.imshow(earthMap,cmap='gist_earth',vmin=-8000, vmax=6705)
+    
+    #setting position and size of colorbar (xPos,yPos,width,height)
+    cax = fig.add_axes([0.434, 0.16, 0.4, 0.018]) 
+    cbar = fig.colorbar(im,orientation="horizontal",cax=cax)
+    cbar.set_label('Höhe über N.N. [m]', size=24, labelpad=20)
+    ax2.axis('off')
+
+
+
+
 
 mollview = np.loadtxt("mollviewEarth.dat")
 #cartview = np.loadtxt("cartviewEarth.dat")
@@ -133,9 +190,9 @@ ell = np.arange(len(cl))
 
 def plotAlmMap (LMAX):
     mollviewMapReconstr = np.loadtxt("data/mollviewEarth_recon_max%d.dat"%LMAX)
-    plotEarth(mollviewMapReconstr)
-    plotPowerspectrum(cl,LMAX)
-
+    #plotEarth(mollviewMapReconstr)
+    #plotPowerspectrum(cl,LMAX)
+    plotEarth_Powerspectrum(mollviewMapReconstr,cl,LMAX)
 
 int_wdgt = widgets.IntSlider(
     description=r'$\ell_\text{max}$:',
@@ -385,7 +442,8 @@ def plotCMB(cmbMap):
     #setting position and size of colorbar (xPos,yPos,width,height)
     cax = fig.add_axes([0.32, 0.25, 0.4, 0.018]) 
     cbar = fig.colorbar(im,orientation="horizontal",cax=cax)
-    cbar.set_label('$\Delta T$', size=24, labelpad=20)
+    cbar.set_label('Temperaturschwankung $\Delta T$', size=24, labelpad=20)
+
     ax.axis('off')
 
 
@@ -406,7 +464,8 @@ def plotCMB3d(cmbMap,cmb3d):
     #setting position and size of colorbar (xPos,yPos,width,height)
     cax = fig.add_axes([0.41, 0.3, 0.4, 0.018]) 
     cbar = fig.colorbar(im,orientation="horizontal",cax=cax)
-    cbar.set_label('$\Delta T$', size=24, labelpad=20)
+    cbar.set_label('Temperaturschwankung $\Delta T$', size=24, labelpad=20)
+
     ax2.axis('off')
 
 CMBmollview = np.loadtxt("data/CMBmollview.dat")
@@ -456,10 +515,69 @@ def plotPowerspectrumCMB(clCur,LMAX,isCMB=False):
     plt.yticks(fontsize=16)
     ax.grid(True)
 
+def fmtCMB(x, pos):
+    a, b = '{:.0e}'.format(x).split('e')
+    #a = int(a)
+    b = int(b)
+    return r'${}\!\times 10^{{{}}}$'.format(a, b)
+
+def plotCMB_Powerspectrum(cmbMap,clCur,LMAX):    
+    #split the ell and cl arrays it two halfes 
+    # s.t. they can be plotted in two different plot styles 
+    ellLeq = ellCMB[ellCMB<=LMAX]
+    clDimlessLeq = ellLeq* (ellLeq + 1) * clCur[ellCMB<=LMAX]
+    ellGeq = ellCMB[ellCMB>=LMAX]
+    clDimlessGeq = ellGeq * (ellGeq + 1) * clCur[ellCMB>=LMAX]
+
+    
+    heights = [1.5, 3, 1.5]
+    fig = plt.figure(figsize=(18,10))
+    gs1 = fig.add_gridspec(nrows=3, ncols=1, left=0.05, right=0.25,wspace=0.05, height_ratios=heights)
+    ax1 = fig.add_subplot(gs1[1,0])
+ 
+    
+    #plot the C_l power spectrum
+    ax1.plot(ellLeq, clDimlessLeq, c="#222222", lw=1.5)
+    ax1.plot(ellGeq, clDimlessGeq, c="#666666", lw=1.5)
+    
+    # add the vertical line and shaded region
+    ax1.axvline(x=LMAX,lw=2)
+    xLim = np.array(ax1.get_xlim())    
+    xLim[1] = 1024
+
+    ax1.axvspan(LMAX, xLim[1], facecolor='0.2', alpha=0.2)
+
+    # plot cosmetics
+    ax1.set_xlim(xLim)
+    ax1.set_xlabel(r"$\ell$", size=24)
+    ax1.set_ylabel(r"$\ell(\ell+1)C_{\ell}$", size=24)
+    ax1.yaxis.set_major_formatter(fmtCMB)
+    
+    
+    plt.title("Leistungsspektrum $C_{\ell}$",fontsize=24)
+
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
+    ax1.grid(True)
+    
+    gs2 = fig.add_gridspec(nrows=1, ncols=1, left=0.30, right=0.98,wspace=0.05)
+    ax2 = fig.add_subplot(gs2[0,0])
+
+    #plotting map
+    im = ax2.imshow(cmbMap,vmin=-0.0005, vmax=0.0005)
+    
+    #setting position and size of colorbar (xPos,yPos,width,height)
+    cax = fig.add_axes([0.434, 0.16, 0.4, 0.018]) 
+    cbar = fig.colorbar(im,orientation="horizontal",cax=cax)
+    cbar.set_label('Temperaturschwankung $\Delta T$', size=24, labelpad=20)
+    ax2.axis('off')
+
+
 def plotAlmMapCMB (LMAX):
     mollviewMapReconstr = np.loadtxt("data/mollviewCMB_recon_max%d.dat"%LMAX)
-    plotCMB(mollviewMapReconstr)
-    plotPowerspectrumCMB(clCMB[2:],LMAX,True)
+    #plotCMB(mollviewMapReconstr)
+    #plotPowerspectrumCMB(clCMB[2:],LMAX,True)
+    plotCMB_Powerspectrum(mollviewMapReconstr,clCMB[2:],LMAX)
 
 int_wdgtCMB = widgets.IntSlider(
     description=r'$\ell_\text{max}$:',
@@ -468,7 +586,54 @@ int_wdgtCMB = widgets.IntSlider(
     min=1, max=200, step=15,
     layout=widgets.Layout(width='90%'))
 
+# these are the values they have to reconstruct
+a0 = 0.7
+b0 = 0.9
+c0 = 0.1
+
+Slider1 = widgets.FloatSlider(
+    value=1.0,
+    min=0.0,
+    max=1.0,
+    step=0.1
+)
+Slider2 = widgets.FloatSlider(
+    value=0.0,
+    min=0.0,
+    max=1.0,
+    step=0.1
+)
+Slider3 = widgets.FloatSlider(
+    value=0.1,
+    min=0.0,
+    max=1.0,
+    step=0.1
+)
+
+def signal(x, a = 0.0, b = 0.0, c=0.0):
+    y= a*np.sin(x*np.pi) + b*np.sin(x*2*np.pi) + c*np.sin(x*3*np.pi)
+    return y
+
+def reconstruct_signal(A = 0.1, B = 0.0, C = 0.0):
+    plt.figure(figsize=(13,9))
+    x_space = np.linspace(0, 5, 1000)
+    plt.suptitle("$f(x) = %1.1f \;\sin(\pi \cdot x) + %1.1f \;\sin(2\pi \cdot x)+ %1.1f \;\sin(3\pi \cdot x)$"%(A,B,C), fontsize=18)
+    plt.plot(x_space, signal(x_space, a = A), 'b--', linewidth = 0.8, label="signal1")
+    plt.plot(x_space, signal(x_space, b = B), 'b-.', linewidth = 0.8, label="signal2")
+    plt.plot(x_space, signal(x_space, c = C), 'b:', linewidth = 0.8, label="signal3")
+    plt.plot(x_space, signal(x_space, a0, b0, c0), 'r-', linewidth = 2, label="test signal")
+    plt.plot(x_space, signal(x_space, A, B, C), 'k-', linewidth = 1.5, label="superposed")
+    plt.xlabel("$x$")
+    plt.ylabel("$f(x)$")
+    plt.ylim(-2.0,2.0)
+    plt.legend()
+    plt.show()
+    
+
 pbar.update(1)
+
+
+
 
 ########################## PART 4 #############################################################
 
