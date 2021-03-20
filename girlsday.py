@@ -10,13 +10,13 @@ import numpy.random
 from numpy.linalg import det
 from mpl_toolkits import mplot3d
 import matplotlib.ticker as ticker
-from tqdm import tqdm
+from tqdm import tqdm_notebook
 
 plt.rc('font', family='serif')
 mpl.rcParams['ytick.labelsize'] = 24
 mpl.rcParams['xtick.labelsize'] = 24
 mpl.rcParams['axes.labelsize'] = 34
-mpl.rcParams['legend.fontsize'] = 24
+mpl.rcParams['legend.fontsize'] = 20
 def fmt(x, pos):
     a, b = '{:.1e}'.format(x).split('e')
     b = int(b)
@@ -35,7 +35,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-pbar = tqdm(total=5)
+pbar = tqdm_notebook(total=5, leave=False)
 
 ########################## PART 1 #############################################################
 
@@ -73,7 +73,9 @@ def plotEarth3d(earthMapMoll,earth3d):
    
     #setting position and size of colorbar (xPos,yPos,width,height)
     cax = fig.add_axes([0.41, 0.3, 0.4, 0.018]) 
-    cbar = fig.colorbar(im,orientation="horizontal",cax=cax)
+    ticks = np.arange(-7500,5001,2500)
+    cbar = fig.colorbar(im,orientation="horizontal",cax=cax,ticks=ticks)
+    cax.tick_params(labelsize=20)
     cbar.set_label('Höhe über N.N. [m]', size=24, labelpad=20)
     ax2.axis('off')
 
@@ -112,7 +114,7 @@ def plotPowerspectrum(clCur,LMAX,isCMB=False):
 
     plt.title("Leistungsspektrum $C_{\ell}$",fontsize=24)
 
-    plt.xticks(fontsize=16)
+    plt.xticks([1,10,100],fontsize=16)
     plt.yticks(fontsize=16)
     ax.grid(True)
 
@@ -153,7 +155,7 @@ def plotEarth_Powerspectrum(earthMap,clCur,LMAX):
 
     plt.title("Leistungsspektrum $C_{\ell}$",fontsize=24)
 
-    plt.xticks(fontsize=16)
+    plt.xticks([1,10,100],fontsize=16)
     plt.yticks(fontsize=16)
     ax1.grid(True)
     
@@ -165,12 +167,12 @@ def plotEarth_Powerspectrum(earthMap,clCur,LMAX):
     
     #setting position and size of colorbar (xPos,yPos,width,height)
     cax = fig.add_axes([0.434, 0.16, 0.4, 0.018]) 
-    cbar = fig.colorbar(im,orientation="horizontal",cax=cax)
+    ticks = np.arange(-7500,5001,2500)
+    cbar = fig.colorbar(im,orientation="horizontal",cax=cax,ticks=ticks)
+    cax.tick_params(labelsize=20)
     cbar.set_label('Höhe über N.N. [m]', size=24, labelpad=20)
     ax2.text(700,10,'$\ell = %d$'%LMAX, size=24)
     ax2.axis('off')
-
-
 
 
 
@@ -239,7 +241,7 @@ def triangularPlot ():
     shapeMapArray = np.append([maxL,maxL],np.shape(mapCur))
     mapArray = np.zeros(shapeMapArray)
 
-    pbarTriang = tqdm(total=maxL+1, position=0, leave=True)
+    pbarTriang = tqdm_notebook(total=maxL-3, leave=False)
     for i in range(maxL):
         summedMapsCur = np.zeros_like(mapCur)
         for j in range(maxL):
@@ -256,8 +258,8 @@ def triangularPlot ():
                 if(j==0):
                     axes[i, j].text(leftMarginEll,230,"$\ell=%d$:"%i,size=18)
                 mapArray[i,j] = mapCur
-        pbarTriang.update(1)
-        
+        if(i not in [1,2,4]):
+            pbarTriang.update(1)
         
     axes[0, maxL].text(leftMarginM,topMargMfirst,r"$\Sigma_{\ell\leq\ell_{cur},m(\ell)}$",size=18)
     for curL in range(maxL):
@@ -267,7 +269,6 @@ def triangularPlot ():
         
         axes[curL, maxL].imshow(curSummedMap,cmap='gist_earth')
         axes[curL, maxL].axis('off')
-
 
 pbar.update(1)
 
@@ -468,7 +469,9 @@ def plotCMB3d(cmbMap,cmb3d):
        
     #setting position and size of colorbar (xPos,yPos,width,height)
     cax = fig.add_axes([0.41, 0.3, 0.4, 0.018]) 
-    cbar = fig.colorbar(im,orientation="horizontal",cax=cax)
+    ticks = np.arange(-0.0004,0.00041,0.0002)
+    cbar = fig.colorbar(im,orientation="horizontal",cax=cax,ticks=ticks)
+    cax.tick_params(labelsize=20)
     cbar.set_label('Temperaturschwankung $\Delta T$', size=24, labelpad=20)
 
     ax2.axis('off')
@@ -574,7 +577,9 @@ def plotCMB_Powerspectrum(cmbMap,clCur,LMAX):
     
     #setting position and size of colorbar (xPos,yPos,width,height)
     cax = fig.add_axes([0.434, 0.16, 0.4, 0.018]) 
-    cbar = fig.colorbar(im,orientation="horizontal",cax=cax)
+    ticks = np.arange(-0.0004,0.00041,0.0002)
+    cbar = fig.colorbar(im,orientation="horizontal",cax=cax,ticks=ticks)
+    cax.tick_params(labelsize=20)
     cbar.set_label('Temperaturschwankung $\Delta T$', size=24, labelpad=20)
     ax2.text(700,10,'$\ell = %d$'%LMAX, size=24)
     ax2.axis('off')
@@ -629,19 +634,19 @@ def signal(x, a = 0.0, b = 0.0, c=0.0):
 def reconstruct_signal(A = 0.1, B = 0.0, C = 0.0):
     plt.figure(figsize=(13,9))
     x_space = np.linspace(0, 5, 1000)
-    plt.suptitle("$f(x) = %1.1f \;\sin(\pi \cdot x) + %1.1f \;\sin(2\pi \cdot x)+ %1.1f \;\sin(3\pi \cdot x)$"%(A,B,C), fontsize=18)
-    plt.plot(x_space, signal(x_space, a = A), 'b--', linewidth = 0.8, label="signal1")
-    plt.plot(x_space, signal(x_space, b = B), 'b-.', linewidth = 0.8, label="signal2")
-    plt.plot(x_space, signal(x_space, c = C), 'b:', linewidth = 0.8, label="signal3")
-    plt.plot(x_space, signal(x_space, a0, b0, c0), 'r-', linewidth = 2, label="test signal")
-    plt.plot(x_space, signal(x_space, A, B, C), 'k-', linewidth = 1.5, label="superposed")
+    plt.plot(x_space, signal(x_space, a = A), 'b--', linewidth = 0.8, label="Signal 1")
+    plt.plot(x_space, signal(x_space, b = B), 'b-.', linewidth = 0.8, label="Signal 2")
+    plt.plot(x_space, signal(x_space, c = C), 'b:', linewidth = 0.8, label="Signal 3")
+    plt.plot(x_space, signal(x_space, A, B, C), 'k-', linewidth = 1.5, label="Überlagerung 1+2+3")
+    plt.plot(x_space, signal(x_space, a0, b0, c0), 'r-', linewidth = 2, label="Gemessenes Signal")
     plt.xlabel("$x$")
     plt.ylabel("$f(x)$")
     plt.ylim(-2.0,2.0)
-    plt.legend()
+    plt.text(0.8,2.45," ", fontsize=18)
+    plt.text(0.8,2.3,"$f(x) = %1.1f \;\sin(\pi \cdot x) + %1.1f \;\sin(2\pi \cdot x)+ %1.1f \;\sin(3\pi \cdot x)$"%(A,B,C), fontsize=18)
+    plt.legend(bbox_to_anchor=(1.02, 0.45, 0.5, 0.5))
     plt.show()
     
-
 pbar.update(1)
 
 
@@ -693,7 +698,7 @@ def plotCMBps (oBarPercent):
     ax.set_ylim([0,15000])
     barPercent = oBar*100
     ax.text(1700,13000,"Atome: %.1f%%"%(barPercent/(barPercent/100.+0.1198)),size=28,color='#2966a3')
-    ax.text(1700,11800,"Atome: 15.5%",size=28,color='k')
+    ax.text(1700,11800,"Atome: ? ",size=28,color='k')
 
     
 def checkData(minObar,maxObar,stepSize):
@@ -726,4 +731,4 @@ int_wdgtPowerSpec = widgets.FloatSlider(
     min=minObar*100, max=maxObar*100, step=stepSize*100,
     layout=widgets.Layout(width='90%'),readout=False)
 
-
+pbar.close()
