@@ -681,24 +681,28 @@ def createCldata (oBar):
     np.savetxt("data/Cl_%.3f.dat"%oBar,(ls,totCL_new[:,0]))
 
 def plotCMBps (oBarPercent):
-    
-    
+      
     oBar = oBarPercent/100.
     ls,clCur = np.loadtxt("data/Cl_%.3f.dat"%oBar)
 
-    #print(clCur)
-    
-    fig = plt.figure(figsize=(12,10))
+    fig = plt.figure(figsize=(12,9))
     ax = fig.add_subplot(111)
 
     startI = 10
-    ax.plot(ls[startI:],totCL_fiducial[startI:], color='k')
-    ax.plot(ls[startI:],clCur[startI:], color='#2966a3')
+    amplitude = 1./np.max(totCL_fiducial[startI:])*3.2e-8
+    ax.plot(ls[startI:],totCL_fiducial[startI:]*amplitude, color='k')
+    ax.plot(ls[startI:],clCur[startI:]*amplitude, color='#2966a3')
     ax.set_xlim([0,2500])
-    ax.set_ylim([0,15000])
+    ax.set_ylim([0,15000*amplitude])
+    ax.set_xlabel(r"$\ell$", size=24)
+    ax.set_ylabel(r"$\ell(\ell+1)C_{\ell}$", size=24)
+    ax.yaxis.set_major_formatter(fmtCMB)
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+
     barPercent = oBar*100
-    ax.text(1700,13000,"Atome: %.1f%%"%(barPercent/(barPercent/100.+0.1198)),size=28,color='#2966a3')
-    ax.text(1700,11800,"Atome: ? ",size=28,color='k')
+    ax.text(1700,13000*amplitude,"Atome: %.1f%%"%(barPercent/(barPercent/100.+0.1198)),size=28,color='#2966a3')
+    ax.text(1700,11800*amplitude,"Atome: ? ",size=28,color='k')
 
     
 def checkData(minObar,maxObar,stepSize):
