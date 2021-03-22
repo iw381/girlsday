@@ -480,8 +480,8 @@ CMBmollview = np.loadtxt("data/CMBmollview.dat")
 cmb3d   = plt.imread('./CMB3d_1.png')
 
 LMAX = 1024
-clCMB = np.loadtxt("data/clCMB.dat")
-ellCMB = np.arange(len(clCMB))[2:]
+clCMB = np.loadtxt("data/clCMB.dat")[2:]
+ellCMB = np.arange(len(clCMB))
 
 
 def plotPowerspectrumCMB(clCur,LMAX,isCMB=False):    
@@ -527,27 +527,31 @@ def fmtCMB(x, pos):
     a, b = '{:.0e}'.format(x).split('e')
     #a = int(a)
     b = int(b)
-    return r'${}\!\times 10^{{{}}}$'.format(a, b)
+    #return r'${}\!\times 10^{{{}}}$'.format(a, b)
+    return r'${}$'.format(x)
 
 
-def plotCMB_Powerspectrum(cmbMap,clCur,LMAX):    
+def plotCMB_Powerspectrum(cmbMap,LMAX):    
     #split the ell and cl arrays it two halfes 
     # s.t. they can be plotted in two different plot styles 
-    ellLeq = ellCMB[ellCMB<=LMAX]
-    clDimlessLeq = ellLeq* (ellLeq + 1) * clCur[ellCMB<=LMAX]
-    ellGeq = ellCMB[ellCMB>=LMAX]
-    clDimlessGeq = ellGeq * (ellGeq + 1) * clCur[ellCMB>=LMAX]
+    clDimless = ellCMB * (ellCMB + 1) * clCMB
 
+    ellLeq = ellCMB[ellCMB<=LMAX]
+    clDimlessLeq = clDimless[ellCMB<=LMAX]
+    ellGeq = ellCMB[ellCMB>=LMAX]
+    clDimlessGeq = clDimless[ellCMB>=LMAX]
     
+    lsFidu,clFidu = np.loadtxt("data/Cl_0.022.dat")
+    amplitude = (clFidu[219]+clFidu[220]+clFidu[221])/(clDimless[217]+clDimless[218]+clDimless[219])
+
     heights = [1.5, 3, 1.5]
     fig = plt.figure(figsize=(18,10))
     gs1 = fig.add_gridspec(nrows=3, ncols=1, left=0.05, right=0.25,wspace=0.05, height_ratios=heights)
     ax1 = fig.add_subplot(gs1[1,0])
- 
-    
+     
     #plot the C_l power spectrum
-    ax1.plot(ellLeq, clDimlessLeq, c="#222222", lw=1.5)
-    ax1.plot(ellGeq, clDimlessGeq, c="#666666", lw=1.5)
+    ax1.plot(ellLeq, clDimlessLeq*amplitude, c="#222222", lw=1.5)
+    ax1.plot(ellGeq, clDimlessGeq*amplitude, c="#666666", lw=1.5)
     
     # add the vertical line and shaded region
     ax1.axvline(x=LMAX,lw=2)
@@ -560,9 +564,9 @@ def plotCMB_Powerspectrum(cmbMap,clCur,LMAX):
     ax1.set_xlim(xLim)
     ax1.set_xlabel(r"$\ell$", size=24)
     ax1.set_ylabel(r"$\ell(\ell+1)C_{\ell}$", size=24)
-    ax1.yaxis.set_major_formatter(fmtCMB)
-    
-    
+    #ax1.yaxis.set_major_formatter(fmtCMB)
+    ax1.ticklabel_format(style='plain')
+
     plt.title("Leistungsspektrum $C_{\ell}$",fontsize=24)
 
     plt.xticks(fontsize=16)
@@ -585,7 +589,6 @@ def plotCMB_Powerspectrum(cmbMap,clCur,LMAX):
     ax2.axis('off')
 
 
-
 def plotAlmMapCMB (i):
 
     LMAX = int(np.exp(i/30.*6.9))
@@ -593,7 +596,7 @@ def plotAlmMapCMB (i):
     mollviewMapReconstr = np.loadtxt("data/mollviewCMB_recon_max%d.dat"%LMAX)
     #plotCMB(mollviewMapReconstr)
     #plotPowerspectrumCMB(clCMB[2:],LMAX,True)
-    plotCMB_Powerspectrum(mollviewMapReconstr,clCMB[2:],LMAX)
+    plotCMB_Powerspectrum(mollviewMapReconstr,LMAX)
 
 sliderOptionsCMB = np.arange(1,31,1)
 sliderOptionsCMB = np.delete(sliderOptionsCMB,[1,2,4])
@@ -689,20 +692,19 @@ def plotCMBps (oBarPercent):
     ax = fig.add_subplot(111)
 
     startI = 10
-    amplitude = 1./np.max(totCL_fiducial[startI:])*3.2e-8
-    ax.plot(ls[startI:],totCL_fiducial[startI:]*amplitude, color='k')
-    ax.plot(ls[startI:],clCur[startI:]*amplitude, color='#2966a3')
+    ax.plot(ls[startI:],totCL_fiducial[startI:], color='k')
+    ax.plot(ls[startI:],clCur[startI:], color='#2966a3')
     ax.set_xlim([0,2500])
-    ax.set_ylim([0,15000*amplitude])
+    ax.set_ylim([0,15000])
     ax.set_xlabel(r"$\ell$", size=24)
     ax.set_ylabel(r"$\ell(\ell+1)C_{\ell}$", size=24)
-    ax.yaxis.set_major_formatter(fmtCMB)
+    #ax.yaxis.set_major_formatter(fmtCMB)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
 
     barPercent = oBar*100
-    ax.text(1700,13000*amplitude,"Atome: %.1f%%"%(barPercent/(barPercent/100.+0.1198)),size=28,color='#2966a3')
-    ax.text(1700,11800*amplitude,"Atome: ? ",size=28,color='k')
+    ax.text(1700,13000,"Atome: %.1f%%"%(barPercent/(barPercent/100.+0.1198)),size=28,color='#2966a3')
+    ax.text(1700,11800,"Atome: ? ",size=28,color='k')
 
     
 def checkData(minObar,maxObar,stepSize):
