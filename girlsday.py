@@ -437,6 +437,53 @@ def superpose_spherical_harmonics(l0, l1m0, l1m1, l2m0, l2m1, l2m2, l3m0,l3m1,l3
 out2 = widgets.interactive_output(superpose_spherical_harmonics, {'l0':check_l0,'l1m0':check_l1m0,'l1m1':check_l1m1,'l2m0':check_l2m0,'l2m1':check_l2m1,'l2m2':check_l2m2, 'l3m0':check_l3m0, 'l3m1':check_l3m1, 'l3m2':check_l3m2, 'l3m3':check_l3m3})
 
 
+########################## PART 3b #############################################################
+
+# these are the values they have to reconstruct
+a0 = 0.7
+b0 = 0.9
+c0 = 0.1
+
+Slider1 = widgets.FloatSlider(
+    value=1.0,
+    min=0.0,
+    max=1.0,
+    step=0.1
+)
+Slider2 = widgets.FloatSlider(
+    value=0.0,
+    min=0.0,
+    max=1.0,
+    step=0.1
+)
+Slider3 = widgets.FloatSlider(
+    value=0.1,
+    min=0.0,
+    max=1.0,
+    step=0.1
+)
+
+def signal(x, a = 0.0, b = 0.0, c=0.0):
+    y= a*np.sin(x*np.pi) + b*np.sin(x*2*np.pi) + c*np.sin(x*3*np.pi)
+    return y
+
+def reconstruct_signal(A = 0.1, B = 0.0, C = 0.0):
+    plt.figure(figsize=(13,9))
+    x_space = np.linspace(0, 5, 1000)
+    plt.plot(x_space, signal(x_space, a = A), 'b--', linewidth = 0.8, label="$A\,\sin(\pi\cdot x)$")
+    plt.plot(x_space, signal(x_space, b = B), 'b-.', linewidth = 0.8, label="$B\,\sin(2\pi\cdot x)$")
+    plt.plot(x_space, signal(x_space, c = C), 'b:', linewidth = 0.8, label="$C\,\sin(3\pi\cdot x)$")
+    plt.plot(x_space, signal(x_space, A, B, C), 'k-', linewidth = 1.5, label="$f(x)$")
+    plt.plot(x_space, signal(x_space, a0, b0, c0), 'r-', linewidth = 2, label="Gemessenes Signal")
+    plt.xlabel("$x$")
+    plt.ylabel("$f(x)$")
+    plt.ylim(-2.0,2.0)
+    plt.text(0.8,2.45," ", fontsize=18)
+    plt.text(0.8,2.3,"$f(x) = %1.1f \;\sin(\pi \cdot x) + %1.1f \;\sin(2\pi \cdot x)+ %1.1f \;\sin(3\pi \cdot x)$"%(A,B,C), fontsize=18)
+    plt.legend(bbox_to_anchor=(1.02, 0.45, 0.5, 0.5))
+    plt.show()
+
+pbar.update(1)
 
 
 ########################## PART 4 #############################################################
@@ -454,7 +501,7 @@ def plotCMB(cmbMap):
     #setting position and size of colorbar (xPos,yPos,width,height)
     cax = fig.add_axes([0.32, 0.25, 0.4, 0.018])
     cbar = fig.colorbar(im,orientation="horizontal",cax=cax)
-    cbar.set_label('Temperaturschwankung $\Delta T [\text{K}]$', size=24, labelpad=20)
+    cbar.set_label(r'Temperaturschwankung $\Delta T [\mathrm{K}]$', size=24, labelpad=20)
 
     ax.axis('off')
 
@@ -478,7 +525,7 @@ def plotCMB3d(cmbMap,cmb3d):
     ticks = np.arange(-0.0004,0.00041,0.0002)
     cbar = fig.colorbar(im,orientation="horizontal",cax=cax,ticks=ticks)
     cax.tick_params(labelsize=20)
-    cbar.set_label('Temperaturschwankung $\Delta T [\text{K}]$', size=24, labelpad=20)
+    cbar.set_label(r'Temperaturschwankung $\Delta T [\mathrm{K}]$', size=24, labelpad=20)
 
     ax2.axis('off')
 
@@ -486,8 +533,8 @@ CMBmollview = np.loadtxt("data/CMBmollview.dat")
 cmb3d   = plt.imread('./CMB3d_1.png')
 
 LMAX = 1024
-clCMB = np.loadtxt("data/clCMB.dat")
-ellCMB = np.arange(len(clCMB))[2:]
+clCMB = np.loadtxt("data/clCMB.dat")[2:]
+ellCMB = np.arange(len(clCMB))
 
 
 def plotPowerspectrumCMB(clCur,LMAX,isCMB=False):
@@ -533,27 +580,31 @@ def fmtCMB(x, pos):
     a, b = '{:.0e}'.format(x).split('e')
     #a = int(a)
     b = int(b)
-    return r'${}\!\times 10^{{{}}}$'.format(a, b)
+    #return r'${}\!\times 10^{{{}}}$'.format(a, b)
+    return r'${}$'.format(x)
 
 
-def plotCMB_Powerspectrum(cmbMap,clCur,LMAX):
+def plotCMB_Powerspectrum(cmbMap,LMAX):
     #split the ell and cl arrays it two halfes
     # s.t. they can be plotted in two different plot styles
-    ellLeq = ellCMB[ellCMB<=LMAX]
-    clDimlessLeq = ellLeq* (ellLeq + 1) * clCur[ellCMB<=LMAX]
-    ellGeq = ellCMB[ellCMB>=LMAX]
-    clDimlessGeq = ellGeq * (ellGeq + 1) * clCur[ellCMB>=LMAX]
+    clDimless = ellCMB * (ellCMB + 1) * clCMB
 
+    ellLeq = ellCMB[ellCMB<=LMAX]
+    clDimlessLeq = clDimless[ellCMB<=LMAX]
+    ellGeq = ellCMB[ellCMB>=LMAX]
+    clDimlessGeq = clDimless[ellCMB>=LMAX]
+
+    lsFidu,clFidu = np.loadtxt("data/Cl_0.022.dat")
+    amplitude = (clFidu[219]+clFidu[220]+clFidu[221])/(clDimless[217]+clDimless[218]+clDimless[219])
 
     heights = [1.5, 3, 1.5]
     fig = plt.figure(figsize=(18,10))
     gs1 = fig.add_gridspec(nrows=3, ncols=1, left=0.05, right=0.25,wspace=0.05, height_ratios=heights)
     ax1 = fig.add_subplot(gs1[1,0])
 
-
     #plot the C_l power spectrum
-    ax1.plot(ellLeq, clDimlessLeq, c="#222222", lw=1.5)
-    ax1.plot(ellGeq, clDimlessGeq, c="#666666", lw=1.5)
+    ax1.plot(ellLeq, clDimlessLeq*amplitude, c="#222222", lw=1.5)
+    ax1.plot(ellGeq, clDimlessGeq*amplitude, c="#666666", lw=1.5)
 
     # add the vertical line and shaded region
     ax1.axvline(x=LMAX,lw=2)
@@ -566,8 +617,8 @@ def plotCMB_Powerspectrum(cmbMap,clCur,LMAX):
     ax1.set_xlim(xLim)
     ax1.set_xlabel(r"$\ell$", size=24)
     ax1.set_ylabel(r"$\ell(\ell+1)C_{\ell}$", size=24)
-    ax1.yaxis.set_major_formatter(fmtCMB)
-
+    #ax1.yaxis.set_major_formatter(fmtCMB)
+    ax1.ticklabel_format(style='plain')
 
     plt.title("Leistungsspektrum $C_{\ell}$",fontsize=24)
 
@@ -586,7 +637,7 @@ def plotCMB_Powerspectrum(cmbMap,clCur,LMAX):
     ticks = np.arange(-0.0004,0.00041,0.0002)
     cbar = fig.colorbar(im,orientation="horizontal",cax=cax,ticks=ticks)
     cax.tick_params(labelsize=20)
-    cbar.set_label('Temperaturschwankung $\Delta T [\text{K}]$', size=24, labelpad=20)
+    cbar.set_label(r'Temperaturschwankung $\Delta T [\mathrm{K}]$', size=24, labelpad=20)
     ax2.text(700,10,'$\ell = %d$'%LMAX, size=24)
     ax2.axis('off')
 
@@ -608,7 +659,7 @@ def plotAlmMapCMB (i):
     mollviewMapReconstr = preloaded_list_cmb[i-1]
     #plotCMB(mollviewMapReconstr)
     #plotPowerspectrumCMB(clCMB[2:],LMAX,True)
-    plotCMB_Powerspectrum(mollviewMapReconstr,clCMB[2:],LMAX)
+    plotCMB_Powerspectrum(mollviewMapReconstr,LMAX)
 
 sliderOptionsCMB = np.arange(1,31,1)
 sliderOptionsCMB = np.delete(sliderOptionsCMB,[1,2,4])
@@ -617,54 +668,6 @@ int_wdgtCMB = widgets.SelectionSlider(
     description=r'$\ell$',
     options=sliderOptionsCMB,
     layout=widgets.Layout(width='90%'),readout=False)
-
-# these are the values they have to reconstruct
-a0 = 0.7
-b0 = 0.9
-c0 = 0.1
-
-Slider1 = widgets.FloatSlider(
-    value=1.0,
-    min=0.0,
-    max=1.0,
-    step=0.1
-)
-Slider2 = widgets.FloatSlider(
-    value=0.0,
-    min=0.0,
-    max=1.0,
-    step=0.1
-)
-Slider3 = widgets.FloatSlider(
-    value=0.1,
-    min=0.0,
-    max=1.0,
-    step=0.1
-)
-
-def signal(x, a = 0.0, b = 0.0, c=0.0):
-    y= a*np.sin(x*np.pi) + b*np.sin(x*2*np.pi) + c*np.sin(x*3*np.pi)
-    return y
-
-def reconstruct_signal(A = 0.1, B = 0.0, C = 0.0):
-    plt.figure(figsize=(13,9))
-    x_space = np.linspace(0, 5, 1000)
-    plt.plot(x_space, signal(x_space, a = A), 'b--', linewidth = 0.8, label="A\,$\sin(\pi\cdot x)$")
-    plt.plot(x_space, signal(x_space, b = B), 'b-.', linewidth = 0.8, label="$B\,\sin(2\pi\cdot x)$")
-    plt.plot(x_space, signal(x_space, c = C), 'b:', linewidth = 0.8, label="$C\,\sin(3\pi\cdot x)$")
-    plt.plot(x_space, signal(x_space, A, B, C), 'k-', linewidth = 1.5, label="$f(x)$")
-    plt.plot(x_space, signal(x_space, a0, b0, c0), 'r-', linewidth = 2, label="Gemessenes Signal")
-    plt.xlabel("$x$")
-    plt.ylabel("$f(x)$")
-    plt.ylim(-2.0,2.0)
-    plt.text(0.8,2.45," ", fontsize=18)
-    plt.text(0.8,2.3,"$f(x) = %1.1f \;\sin(\pi \cdot x) + %1.1f \;\sin(2\pi \cdot x)+ %1.1f \;\sin(3\pi \cdot x)$"%(A,B,C), fontsize=18)
-    plt.legend(bbox_to_anchor=(1.02, 0.45, 0.5, 0.5))
-    plt.show()
-
-pbar.update(1)
-
-
 
 
 ########################## PART 5 #############################################################
@@ -704,20 +707,19 @@ def plotCMBps (oBarPercent):
     ax = fig.add_subplot(111)
 
     startI = 10
-    amplitude = 1./np.max(totCL_fiducial[startI:])*3.2e-8
-    ax.plot(ls[startI:],totCL_fiducial[startI:]*amplitude, color='k')
-    ax.plot(ls[startI:],clCur[startI:]*amplitude, color='#2966a3')
+    ax.plot(ls[startI:],totCL_fiducial[startI:], color='r')
+    ax.plot(ls[startI:],clCur[startI:], color='k')
     ax.set_xlim([0,2500])
-    ax.set_ylim([0,15000*amplitude])
+    ax.set_ylim([0,15000])
     ax.set_xlabel(r"$\ell$", size=24)
     ax.set_ylabel(r"$\ell(\ell+1)C_{\ell}$", size=24)
-    ax.yaxis.set_major_formatter(fmtCMB)
+    #ax.yaxis.set_major_formatter(fmtCMB)
     plt.xticks(fontsize=18)
     plt.yticks(fontsize=18)
 
     barPercent = oBar*100
-    ax.text(1700,13000*amplitude,"Atome: %.1f%%"%(barPercent/(barPercent/100.+0.1198)),size=28,color='#2966a3')
-    ax.text(1700,11800*amplitude,"Atome: ? ",size=28,color='r')
+    ax.text(1700,13000,"Atome: %.1f%%"%(barPercent/(barPercent/100.+0.1198)),size=28,color='k')
+    ax.text(1700,11800,"Atome: ? ",size=28,color='r')
 
 
 def checkData(minObar,maxObar,stepSize):
